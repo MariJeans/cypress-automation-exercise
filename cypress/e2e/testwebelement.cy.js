@@ -14,7 +14,7 @@ describe('testwebelement', () => {
     cy.contains('Buscar con Google').get('.gNO89b')
   })
 
-  it.only('test2', () => {
+  it('test2', () => {
     cy.visit('https://www.amazon.com/')
     cy.get('.a-button-text').contains('Descartar').should('be.visible')
 
