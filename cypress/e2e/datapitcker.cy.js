@@ -13,7 +13,5 @@ describe('Date picker', () => {
     //ingresamos fecha manualmente
     cy.get('#datepicker').clear().type('12/16/2026')
     cy.get('#datepicker').should('have.value', '12/16/2026')
-
   })
-
 })

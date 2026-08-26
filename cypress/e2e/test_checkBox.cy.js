@@ -21,12 +21,3 @@ describe('CheckBox Test', () => {
   })
 
 })
-
-describe('Date picker', () => {
-  it('2.Should check date picker', () => {
-    cy.visit('https://jqueryui.com/resources/demos/datepicker/default.html')
-  
-
-  })
-
-})
