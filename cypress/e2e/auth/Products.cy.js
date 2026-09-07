@@ -8,13 +8,15 @@ describe('Flujo de Lista de Productos ', () => {
   it('TC08 - See List and Details of Products', () => {
     cy.contains('Products').click()
     cy.contains('View Product').click()
-    cy.get('.product-information').contains('Blue Top').should('be.visible')
-    cy.get('.product-information').contains('Category: Women > Tops').should('be.visible')
-    cy.contains('Rs. 500').should('be.visible')
-    cy.contains('Availability: In Stock').should('be.visible')
-    cy.contains('Condition: New').should('be.visible')
-    cy.contains('Brand: Polo').should('be.visible')
-
+    cy.get('.product-information').within(() => {
+      cy.contains('Blue Top').should('be.visible')
+      cy.contains('Category: Women > Tops').should('be.visible')
+      cy.contains('Rs. 500').should('be.visible')
+      cy.contains('Availability: In Stock').should('be.visible')
+      cy.contains('Condition: New').should('be.visible')
+      cy.contains('Brand: Polo').should('be.visible')
+    })
+    
   })
 
   it('TC09 - Search for a Product', () => {
