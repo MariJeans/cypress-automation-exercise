@@ -1,10 +1,10 @@
-describe('Carritos ', () => {
+describe('Cart ', () => {
 
   beforeEach(() => {
     cy.visit('https://automationexercise.com/products');
   })
 
-  it.only('TC12 - Agregar productos al carrito', () => {
+  it('TC12 - Add products to cart', () => {
       // --- Producto 1 ---
     cy.get('.product-image-wrapper')
       .eq(0)
@@ -46,10 +46,37 @@ describe('Carritos ', () => {
 
     cy.get('#cart_info_table tbody tr').eq(1)
       .should('have.attr', 'id', 'product-2');
-
-
 })
 
+  it('TC13 - Verify quantity in cart', () => {
+      // --- Producto 1 ---
+    cy.get('.product-image-wrapper')
+      .eq(0)
+      //junto 2 clases
+      .find('.productinfo .add-to-cart')
+      .click({ force: true }); // force: true porque el botón real está oculto
+
+    // Esta vez vamos directo al carrito desde el modal
+    cy.get('.modal-content').contains('View Cart').click();
+
+    // --- Verificación en el carrito ---
+    cy.url().should('include', '/view_cart');
+
+    // Deben existir exactamente 1 filas de producto en el carrito
+    cy.get('#cart_info_table tbody tr').should('have.length', 1);
+
+    //Agregamos 4 unidades del producto 1
+    cy.get('.cart_description').click()
+    cy.get('#quantity').clear().type('4')
+    cy.contains('Add to cart').click()
+    cy.get('.modal-content').contains('View Cart').click();
+
+    // Verificamos que el producto 1 tenga cantidad 4
+    cy.get('#cart_info_table tbody tr').eq(0)
+      .find('td.cart_quantity button.disabled')
+      .should('contain.text', '5');
+
+})
 
 })
 
