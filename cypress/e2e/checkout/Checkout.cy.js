@@ -79,8 +79,11 @@ describe('Checkout', () => {
     cy.get('[data-qa="expiry-month"]').type('12')
     cy.get('[data-qa="expiry-year"]').type('2028')
     cy.get('[data-qa="pay-button"]').click()
-    cy.contains('Your order has been placed successfully!').should('be.visible')
+    // El mensaje "Your order has been placed successfully!" es transitorio (desaparece al redirigir),
+    // así que verificamos la página de confirmación final
+    cy.url().should('include', '/payment_done')
     cy.contains('Order Placed!').should('be.visible')
+    cy.contains('Congratulations! Your order has been confirmed!').should('be.visible')
 
     // Cleanup
     cy.contains('Delete Account').click({ force: true })

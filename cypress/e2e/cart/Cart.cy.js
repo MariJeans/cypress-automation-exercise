@@ -71,7 +71,7 @@ describe('Cart ', () => {
     cy.contains('Add to cart').click()
     cy.get('.modal-content').contains('View Cart').click();
 
-    // Verificamos que el producto 1 tenga cantidad 4
+    // Verificamos que el producto 1 tenga cantidad 5 (1 inicial + 4 agregadas)
     cy.get('#cart_info_table tbody tr').eq(0)
       .find('td.cart_quantity button.disabled')
       .should('contain.text', '5');

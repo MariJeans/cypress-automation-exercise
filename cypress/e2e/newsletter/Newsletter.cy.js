@@ -22,12 +22,14 @@ describe('Flujo Newsletter', () => {
     cy.contains('You have been successfully subscribed!').should('be.visible')
   })
 
-  it('TC11 - Subscribe in the Product Page ', () => {
+  it('TC11 - Subscribe in the Cart Page', () => {
     const emailCart = `maria.test.${Date.now()}@ejemplo.com`
 
     // Given: usuario va a la página de carrito haciendo clic en el menú
     // Usamos el contenedor de navegación de la web para no confundir el botón del menú con otros textos
-    cy.contains('Product').click()
+    cy.get('.shop-menu a[href="/view_cart"]').click()
+    cy.url().should('include', '/view_cart')
+    cy.contains('Subscription').should('be.visible')
 
     // When: ingresa email en el footer del carrito → click en el botón de flecha
     cy.get('#susbscribe_email').type(emailCart,{ force: true })    

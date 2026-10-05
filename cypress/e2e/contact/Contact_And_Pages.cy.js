@@ -17,7 +17,7 @@ describe('Form Contact and Pages access ', () => {
     cy.contains('Success! Your details have been submitted successfully.').should('be.visible') 
   })
 
-   it.only('TC06.2- Send contact form successfully with an attachment ', () => {
+   it('TC06.2- Send contact form successfully with an attachment ', () => {
     //When: usuario completa el formulario de contacto y lo envía con un archivo adjunto
     cy.contains('Contact us').click()
     cy.get('input[name="name"]').type('John Doe')
