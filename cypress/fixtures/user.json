@@ -1,0 +1,15 @@
+{
+  "name": "María Test",
+  "password": "Test1234",
+  "birthDay": "16",
+  "birthMonth": "December",
+  "birthYear": "1998",
+  "firstName": "María",
+  "lastName": "Acuna",
+  "address": "Test 1234",
+  "country": "Canada",
+  "state": "Ontario",
+  "city": "Toronto",
+  "zipcode": "M5V 2T6",
+  "mobile": "4161234567"
+}

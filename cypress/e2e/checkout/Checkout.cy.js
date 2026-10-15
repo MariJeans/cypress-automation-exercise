@@ -1,13 +1,12 @@
 describe('Checkout', () => {
 
   beforeEach(() => {
-    cy.visit('https://automationexercise.com/products');
+    cy.visit('/products');
   })
 
   it('TC14 - Register while checkout', () => {
-    const email = `maria.test.${Date.now()}@ejemplo.com`
-      // --- Producto 1 ---
 
+      // --- Producto 1 ---
     cy.contains('Home').should('be.visible');
     cy.get('.product-image-wrapper')
       .eq(0)
@@ -29,29 +28,22 @@ describe('Checkout', () => {
     cy.get('.modal-content').should('be.visible');
     cy.get('.text-center').eq(1).should('contain.text', 'Register / Login').click();
 
-    // When: completa el signup
-    cy.get('[data-qa="signup-name"]').type('María Test')
-    cy.get('[data-qa="signup-email"]').type(email)
-    cy.contains('button', 'Signup').click()
-    cy.get('#id_gender2').check()
-    cy.get('#password').type('Test1234', { log: false })
-    cy.get('#days').select('16')
-    cy.get('#months').select('December')
-    cy.get('#years').select('1998')
-    cy.get('#first_name').type('María')
-    cy.get('#last_name').type('Acuna')
-    cy.get('#address1').type('Test 1234')
-    cy.get('#country').select('Canada')
-    cy.get('#state').type('Ontario')
-    cy.get('#city').type('Toronto')
-    cy.get('#zipcode').type('M5V 2T6')
-    cy.get('#mobile_number').type('4161234567')
-    cy.contains('button', 'Create Account').click()
-
+    // When: Se registra durante el checkout
+    cy.registerUser().then((user) => {
+      cy.contains('Cart').click()
+      cy.contains('Proceed To Checkout').click()
+      cy.get('.checkout-information').should('be.visible')
+      cy.get('#address_delivery').should(($lista) => {
+        const texto = $lista.text()
+        expect(texto).to.include(`${user.firstName} ${user.lastName}`)
+        expect(texto).to.include(user.address)
+        expect(texto).to.include(user.country)
+        expect(texto).to.include(user.city)
+        expect(texto).to.include(user.zipcode)
+        expect(texto).to.include(user.mobile)
+      })
     
-    cy.contains('Account Created!').should('be.visible')
-    cy.contains('[data-qa="continue-button"]', 'Continue').click()
-    cy.contains('Logged in as').should('be.visible')
+    
 
     cy.contains('Cart').click()
     cy.contains('Proceed To Checkout').click()
@@ -59,12 +51,12 @@ describe('Checkout', () => {
     cy.get('#address_delivery').should(($lista) => {
         const texto = $lista.text()
   
-        expect(texto).to.include('María Acuna')
-        expect(texto).to.include('Test 1234')
-        expect(texto).to.include('Canada')
-        expect(texto).to.include('Toronto')
-        expect(texto).to.include('M5V 2T6')
-        expect(texto).to.include('4161234567')
+        expect(texto).to.include(`${user.firstName} ${user.lastName}`)
+        expect(texto).to.include(user.address)
+        expect(texto).to.include(user.country)
+        expect(texto).to.include(user.city)
+        expect(texto).to.include(user.zipcode)
+        expect(texto).to.include(user.mobile)
     })
 
     // Verificamos que sea 1 producto (por data-product-id)
@@ -73,7 +65,7 @@ describe('Checkout', () => {
 
     cy.contains('Place Order').click()
     cy.contains('Payment').should('be.visible');
-    cy.get('[data-qa="name-on-card"]').type('María Acuna')
+    cy.get('[data-qa="name-on-card"]').type(`${user.firstName} ${user.lastName}`)
     cy.get('[data-qa="card-number"]').type('1234 5678 9012 3456')
     cy.get('[data-qa="cvc"]').type('123')
     cy.get('[data-qa="expiry-month"]').type('12')
@@ -84,12 +76,19 @@ describe('Checkout', () => {
     cy.url().should('include', '/payment_done')
     cy.contains('Order Placed!').should('be.visible')
     cy.contains('Congratulations! Your order has been confirmed!').should('be.visible')
-
-    // Cleanup
-    cy.contains('Delete Account').click({ force: true })
-    cy.contains('Account Deleted!').should('be.visible')
-
     })
 
+  })
 
-})
+  afterEach(() => {
+    // Cleanup: Eliminar la cuenta si existe
+    cy.get('body').then(($body) => {
+      if ($body.find('a:contains("Delete Account")').length > 0) {
+        cy.contains('Delete Account').click({ force: true });
+        cy.contains('Account Deleted!').should('be.visible');
+      }
+    });
+  })
+
+}) 
+  

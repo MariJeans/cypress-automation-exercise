@@ -2,6 +2,7 @@ const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
   e2e: {
+    baseUrl: 'https://automationexercise.com',
     chromeWebSecurity: false, // Desactiva seguridad estricta para evitar conflictos de window
     blockHosts: [
       "*googlesyndication.com",
@@ -12,4 +13,4 @@ module.exports = defineConfig({
       // implement node event listeners here
     },
   },
-});
+})
