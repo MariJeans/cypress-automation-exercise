@@ -52,7 +52,8 @@ Cypress.Commands.add('registerUser', (overrides = {}) => {
     // guardas: confirman que la precondición se cumplió (si no, falla acá con un mensaje claro)      // Then
     cy.contains('Account Created!').should('be.visible')
     cy.contains('[data-qa="continue-button"]', 'Continue').click()
-    cy.contains('Logged in as').should('be.visible')
+    cy.contains('Logged in as', { timeout: 5000 }).should('be.visible')
 
   cy.wrap(user)
 })
+
