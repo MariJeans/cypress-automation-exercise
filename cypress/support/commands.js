@@ -54,6 +54,15 @@ Cypress.Commands.add('registerUser', (overrides = {}) => {
     cy.contains('[data-qa="continue-button"]', 'Continue').click()
     cy.contains('Logged in as', { timeout: 5000 }).should('be.visible')
 
-  cy.wrap(user)
+  cy.wrap(user, { log: false }).as('registeredUser') // guardas el usuario registrado para usarlo en los tests
 })
+
+Cypress.Commands.add('loginSinAssert', (email, password) => {
+    cy.visit('/login')
+    cy.get('[data-qa="login-email"]').type(email)
+    cy.get('[data-qa="login-password"]').type(password, { log: false })
+    cy.contains('button', 'Login').click()
+})
+
+
 
