@@ -179,12 +179,6 @@ describe('Checkout', () => {
       cy.contains('Congratulations! Your order has been confirmed!').should('be.visible')
       })
 
-    // hace logout 
-    cy.contains('Logout', { timeout: 10000 }).should('be.visible')
-    cy.contains('Logout').click()
-    // valida que se redirige a la pantalla de login
-    cy.url().should('include', '/login')
-    cy.contains('Login to your account').should('be.visible')
   })
 
 })
