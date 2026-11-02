@@ -62,6 +62,7 @@ Cypress.Commands.add('loginSinAssert', (email, password) => {
     cy.get('[data-qa="login-email"]').type(email)
     cy.get('[data-qa="login-password"]').type(password, { log: false })
     cy.contains('button', 'Login').click()
+    
 })
 
 
