@@ -1,31 +1,47 @@
-describe('Flujo de Lista de Productos ', () => {
+const goToProducts = () => {
+  cy.get('.shop-menu a[href="/products"]').click()
+  cy.url().should('include', '/products')
+  cy.contains('.features_items .title', 'All Products').should('be.visible')
+}
+
+const searchProduct = (term) => {
+  cy.get('#search_product').type(term)
+  cy.get('#submit_search').click()
+  cy.contains('.features_items .title', 'Searched Products').should('be.visible')
+}
+
+describe('Products', () => {
 
   beforeEach(() => {
-    // Given: usuario en la home, navega a la pantalla de login/signup
-    cy.visit('https://automationexercise.com/')
+    // Given: usuario en la home
+    cy.visit('/')
   })
 
-  it('TC08 - See List and Details of Products', () => {
-    cy.contains('Products').click()
-    cy.contains('View Product').click()
+  it('TC08 - Verify All Products and product detail page', () => {
+    // When
+    goToProducts()
+    cy.get('.features_items .product-image-wrapper').should('have.length.greaterThan', 0)
+    cy.get('a[href="/product_details/1"]').click()
+
+    // Then: se muestra el detalle completo del producto
+    cy.url().should('include', '/product_details/1')
     cy.get('.product-information').within(() => {
-      cy.contains('Blue Top').should('be.visible')
+      cy.contains('h2', 'Blue Top').should('be.visible')
       cy.contains('Category: Women > Tops').should('be.visible')
       cy.contains('Rs. 500').should('be.visible')
       cy.contains('Availability: In Stock').should('be.visible')
       cy.contains('Condition: New').should('be.visible')
       cy.contains('Brand: Polo').should('be.visible')
     })
-    
   })
 
-  it('TC09 - Search for a Product', () => {
-    cy.contains('Products').click()
-    cy.get('#search_product').type('White Top')
-    cy.get('#submit_search').click()
-    cy.contains('Searched Products').should('be.visible')
-    cy.get('.productinfo').contains('Summer White Top').should('be.visible')
+  it('TC09 - Search Product', () => {
+    // When
+    goToProducts()
+    searchProduct('White Top')
 
+    // Then
+    cy.contains('.features_items .productinfo p', 'Summer White Top').should('be.visible')
   })
 
   it('TC18 - View Category Products', () => {
@@ -36,16 +52,16 @@ describe('Flujo de Lista de Productos ', () => {
     cy.get('a[href="#Women"]').click()
     cy.get('#Women').contains('a', 'Dress').click()
 
-    // Then: se muestra la página de la categoría
+    // Then
     cy.url().should('include', '/category_products/1')
     cy.contains('.features_items .title', 'Women - Dress Products').should('be.visible')
     cy.get('.features_items .product-image-wrapper').should('have.length.greaterThan', 0)
 
-    // When: abre una subcategoría de Men
+    // When: abre Men > Tshirts
     cy.get('a[href="#Men"]').click()
     cy.get('#Men').contains('a', 'Tshirts').click()
 
-    // Then: se muestra la página de la subcategoría de Men
+    // Then
     cy.url().should('include', '/category_products/3')
     cy.contains('.features_items .title', 'Men - Tshirts Products').should('be.visible')
     cy.get('.features_items .product-image-wrapper').should('have.length.greaterThan', 0)
@@ -53,36 +69,34 @@ describe('Flujo de Lista de Productos ', () => {
 
   it('TC19 - View & Cart Brand Products', () => {
     // Given: las marcas se ven en la página de productos
-    cy.contains('Products').click()
+    goToProducts()
     cy.contains('.brands_products h2', 'Brands').should('be.visible')
 
-    // When: elige la marca Polo
+    // When: elige Polo
     cy.get('.brands-name a[href="/brand_products/Polo"]').click()
 
-    // Then: se muestran los productos de Polo
+    // Then
     cy.url().should('include', '/brand_products/Polo')
     cy.contains('.features_items .title', 'Brand - Polo Products').should('be.visible')
     cy.get('.features_items .product-image-wrapper').should('have.length.greaterThan', 0)
 
-    // When: cambia a otra marca desde la barra lateral
+    // When: cambia a H&M
     cy.get('.brands-name a[href="/brand_products/H&M"]').click()
 
-    // Then: se muestran los productos de H&M
+    // Then
     cy.url().should('include', '/brand_products/H&M')
     cy.contains('.features_items .title', 'Brand - H&M Products').should('be.visible')
     cy.get('.features_items .product-image-wrapper').should('have.length.greaterThan', 0)
   })
 
   it('TC20 - Search Products and Verify Cart After Login', () => {
-    // Given: un usuario propio del test (evita ensuciar el carrito de la cuenta permanente), deslogueado
+    // Given: un usuario propio del test (no ensucia el carrito de la cuenta permanente), deslogueado
     cy.registerUser().then((user) => {
-      cy.contains('a', 'Logout').click()
+      cy.get('.shop-menu a[href="/logout"]').click()
 
-      // When: busca productos y agrega todos los resultados al carrito
-      cy.visit('/products')
-      cy.get('#search_product').type('Jeans')
-      cy.get('#submit_search').click()
-      cy.contains('.features_items .title', 'Searched Products').should('be.visible')
+      // When: busca y agrega todos los resultados al carrito
+      goToProducts()
+      searchProduct('Jeans')
 
       cy.get('.features_items .productinfo p').then(($names) => {
         const searchedNames = $names.toArray().map((el) => el.innerText.trim())
@@ -91,25 +105,24 @@ describe('Flujo de Lista de Productos ', () => {
 
         cy.get('.features_items .productinfo .add-to-cart').each(($btn) => {
           cy.wrap($btn).click({ force: true })
-          cy.get('.modal-content').should('be.visible')
-          cy.get('.modal-content .close-modal').click()
-          cy.get('.modal-content').should('not.be.visible')
+          cy.get('#cartModal .modal-content').should('be.visible')
+          cy.continueShopping()
         })
 
-        // Then: los productos están en el carrito
         const verifyCartProducts = () => {
-          cy.get('.shop-menu a[href="/view_cart"]').click()
+          cy.goToCart()
           cy.get('#cart_info_table tbody tr').should('have.length', searchedNames.length)
           cy.get('.cart_description h4 a').should(($links) => {
             const cartNames = $links.toArray().map((el) => el.innerText.trim())
             expect(cartNames).to.have.members(searchedNames)
           })
         }
+
+        // Then: los productos están en el carrito
         verifyCartProducts()
 
         // When: inicia sesión
-        cy.get('.shop-menu a[href="/login"]').click()
-        cy.loginSinAssert(user.email, user.password)
+        cy.login(user.email, user.password)
         cy.contains('Logged in as').should('be.visible')
 
         // Then: los productos siguen en el carrito
@@ -123,8 +136,7 @@ describe('Flujo de Lista de Productos ', () => {
 
   it('TC21 - Add review on product', () => {
     // Given: detalle del primer producto
-    cy.contains('Products').click()
-    cy.contains('.features_items .title', 'All Products').should('be.visible')
+    goToProducts()
     cy.get('a[href="/product_details/1"]').click()
     cy.contains('Write Your Review').should('be.visible')
 

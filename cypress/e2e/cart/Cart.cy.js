@@ -1,94 +1,59 @@
-describe('Cart ', () => {
+// Verifica una fila del carrito: cantidad esperada y total = precio x cantidad
+const verifyCartRow = (productId, expectedQuantity) => {
+  cy.get(`#product-${productId}`).should(($row) => {
+    const toNumber = (text) => Number(text.replace(/[^\d]/g, ''))
+    const price = toNumber($row.find('.cart_price p').text())
+    const quantity = toNumber($row.find('.cart_quantity button').text())
+    const total = toNumber($row.find('.cart_total_price').text())
+
+    expect(quantity, 'quantity').to.equal(expectedQuantity)
+    expect(total, 'total').to.equal(price * quantity)
+  })
+}
+
+describe('Cart', () => {
 
   beforeEach(() => {
-    cy.visit('https://automationexercise.com/products');
+    // Given: usuario en la página de productos
+    cy.visit('/products')
   })
 
-  it('TC12 - Add products to cart', () => {
-      // --- Producto 1 ---
-    cy.get('.product-image-wrapper')
-      .eq(0)
-      //junto 2 clases
-      .find('.productinfo .add-to-cart')
-      .click({ force: true }); // force: true porque el botón real está oculto
+  it('TC12 - Add Products in Cart', () => {
+    // When: agrega dos productos
+    cy.addProductToCart(0)
+    cy.continueShopping()
+    cy.addProductToCart(1)
+    cy.viewCartFromModal()
 
-    // Se abre el modal de confirmación
-    cy.get('.modal-content', { timeout: 10000 })
-      .should('be.visible')
-      .and('contain.text', 'Your product has been added to cart.');
+    // Then: ambos están en el carrito con precio, cantidad y total correctos
+    cy.get('#cart_info_table tbody tr').should('have.length', 2)
+    verifyCartRow(1, 1)
+    verifyCartRow(2, 1)
+  })
 
-    // Seguimos comprando (cerramos el modal) en vez de ir al carrito todavía
-    cy.get('.modal-content .close-modal').click();
-    cy.get('.modal-content').should('not.be.visible');
-
-     // --- Producto 2 ---
-    cy.get('.product-image-wrapper')
-      .eq(1)
-      .find('.productinfo .add-to-cart')
-      .click({ force: true });
-
-    cy.get('.modal-content', { timeout: 10000 })
-      .should('be.visible')
-      .and('contain.text', 'Your product has been added to cart.');
-
-    // Esta vez vamos directo al carrito desde el modal
-    cy.get('.modal-content').contains('View Cart').click();
-
-    // --- Verificación en el carrito ---
-    cy.url().should('include', '/view_cart');
-
-    // Deben existir exactamente 2 filas de producto en el carrito
-    cy.get('#cart_info_table tbody tr').should('have.length', 2);
-
-    // Verificamos que sean los productos 1 y 2 (por data-product-id)
-    cy.get('#cart_info_table tbody tr').eq(0)
-      .should('have.attr', 'id', 'product-1');
-
-    cy.get('#cart_info_table tbody tr').eq(1)
-      .should('have.attr', 'id', 'product-2');
-})
-
-  it('TC13 - Verify quantity in cart', () => {
-      // --- Producto 1 ---
-    cy.get('.product-image-wrapper')
-      .eq(0)
-      //junto 2 clases
-      .find('.productinfo .add-to-cart')
-      .click({ force: true }); // force: true porque el botón real está oculto
-
-    // Esta vez vamos directo al carrito desde el modal
-    cy.get('.modal-content').contains('View Cart').click();
-
-    // --- Verificación en el carrito ---
-    cy.url().should('include', '/view_cart');
-
-    // Deben existir exactamente 1 filas de producto en el carrito
-    cy.get('#cart_info_table tbody tr').should('have.length', 1);
-
-    //Agregamos 4 unidades del producto 1
-    cy.get('.cart_description').click()
+  it('TC13 - Verify Product quantity in Cart', () => {
+    // When: abre el detalle del producto, sube la cantidad a 4 y lo agrega
+    cy.get('a[href="/product_details/1"]').click()
+    cy.url().should('include', '/product_details/1')
     cy.get('#quantity').clear().type('4')
-    cy.contains('Add to cart').click()
-    cy.get('.modal-content').contains('View Cart').click();
+    cy.contains('button', 'Add to cart').click()
+    cy.viewCartFromModal()
 
-    // Verificamos que el producto 1 tenga cantidad 5 (1 inicial + 4 agregadas)
-    cy.get('#cart_info_table tbody tr').eq(0)
-      .find('td.cart_quantity button.disabled')
-      .should('contain.text', '5');
+    // Then: el producto aparece con cantidad 4
+    cy.get('#cart_info_table tbody tr').should('have.length', 1)
+    verifyCartRow(1, 4)
+  })
 
-})
-
-  it('TC17 - Remove products from cart', () => {
+  it('TC17 - Remove Products From Cart', () => {
     // Given: un producto en el carrito
     cy.addProductToCart(0)
-    cy.get('.modal-content').contains('View Cart').click()
-    cy.url().should('include', '/view_cart')
+    cy.viewCartFromModal()
     cy.get('#cart_info_table tbody tr').should('have.length', 1)
 
-    // When: elimina el producto con la "X"
+    // When: lo elimina con la "X"
     cy.get('#product-1 .cart_quantity_delete').click()
 
-    // Then: el producto desaparece y el carrito queda vacío
+    // Then: el carrito queda vacío
     cy.get('#product-1').should('not.exist')
     cy.get('#empty_cart').should('be.visible').and('contain.text', 'Cart is empty!')
   })
@@ -104,17 +69,12 @@ describe('Cart ', () => {
       .first()
       .then(($btn) => {
         const productId = $btn.attr('data-product-id')
-        cy.wrap($btn).click({ force: true }) // el carrusel rota solo, force evita fallos por animación
-
-        cy.get('.modal-content', { timeout: 10000 }).should('be.visible')
-        cy.get('.modal-content').contains('View Cart').click()
+        cy.wrap($btn).click({ force: true }) // el carrusel rota solo; force evita fallos por la animación
+        cy.viewCartFromModal()
 
         // Then: el producto está en el carrito
-        cy.url().should('include', '/view_cart')
         cy.get(`#product-${productId}`).should('be.visible')
       })
   })
 
 })
-
-

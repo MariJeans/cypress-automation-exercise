@@ -1,60 +1,58 @@
-describe('Flujo de Autenticación', () => {
+describe('Authentication', () => {
 
   beforeEach(() => {
-    // usuario en la home, navega a la pantalla de login/signup
-    cy.visit('https://automationexercise.com/')
-    cy.contains('Signup / Login').click()
+    // Given: usuario en la home navega a Signup / Login
+    cy.visit('/')
+    cy.get('.shop-menu a[href="/login"]').click()
+    cy.url().should('include', '/login')
   })
 
-  it('TC01 - Register new user', () => {
-    cy.registerUser() // usa el comando custom para registrar un usuario
+  it('TC01 - Register User', () => {
+    // When / Then: el comando valida "Account Created!" y el estado logueado
+    cy.registerUser()
 
     // Cleanup
-    cy.contains('Delete Account').click({ force: true })
-    cy.contains('Account Deleted!').should('be.visible')
+    cy.deleteAccount()
   })
 
-  it('TC02 - Login with valid credentials', () => {
-    // Inicia sesión con credenciales válidas
+  it('TC02 - Login User with correct email and password', () => {
+    // When
     cy.env(['TEST_USER_EMAIL', 'TEST_USER_PASSWORD']).then(({ TEST_USER_EMAIL, TEST_USER_PASSWORD }) => {
-      cy.loginSinAssert(TEST_USER_EMAIL, TEST_USER_PASSWORD)
-      cy.contains('Logged in as', { timeout: 10000 }).should('be.visible')
+      cy.login(TEST_USER_EMAIL, TEST_USER_PASSWORD)
     })
+
     // Then
-    cy.contains('Logout', { timeout: 10000 }).should('be.visible')
+    cy.contains('Logged in as').should('be.visible')
+    cy.get('.shop-menu a[href="/logout"]').should('be.visible')
   })
 
+  it('TC03 - Login User with incorrect email and password', () => {
+    // When
+    cy.login('invalid@ejemplo.com', 'Test1234')
 
-
-  it('TC03 - Login with invalid credentials', () => {
-    // When: intenta loguearse con credenciales inválidas
-    cy.loginSinAssert('invalid@ejemplo.com', 'Test1234')
     // Then
     cy.contains('Your email or password is incorrect!').should('be.visible')
+    cy.get('.shop-menu a[href="/logout"]').should('not.exist')
   })
 
-  it('TC04 - Logout de usuario', () => {
-    // login con usuario válido
-    cy.env(['TEST_USER_EMAIL', 'TEST_USER_PASSWORD']).then(({ TEST_USER_EMAIL, TEST_USER_PASSWORD }) => {
-      cy.loginSinAssert(TEST_USER_EMAIL, TEST_USER_PASSWORD)
-      cy.contains('Logged in as', { timeout: 10000 }).should('be.visible')
+  it('TC04 - Logout User', () => {
+    // Given
+    cy.loginAsTestUser()
 
-    })
-    // hace logout 
-    cy.contains('Logout', { timeout: 10000 }).should('be.visible')
-    cy.contains('Logout').click()
+    // When
+    cy.get('.shop-menu a[href="/logout"]').click()
 
-    // valida que se redirige a la pantalla de login
+    // Then: vuelve a la pantalla de login
     cy.url().should('include', '/login')
     cy.contains('Login to your account').should('be.visible')
   })
 
-  it('TC05 - Register with an email that already exists', () => {
+  it('TC05 - Register User with existing email', () => {
     // When: intenta registrarse con un email ya usado
     cy.env(['TEST_USER_EMAIL']).then(({ TEST_USER_EMAIL }) => {
       cy.get('[data-qa="signup-name"]').type('Usuario de Prueba')
       cy.get('[data-qa="signup-email"]').type(TEST_USER_EMAIL)
-      cy.contains('button', 'Signup').click()
+      cy.get('[data-qa="signup-button"]').click()
     })
 
     // Then

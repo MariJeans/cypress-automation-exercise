@@ -26,7 +26,7 @@ describe('Scroll Up / Scroll Down', () => {
     shouldBeInViewport('.footer-widget h2', 'Subscription')
   })
 
-  it('TC25 - Scroll Up using Arrow button and Scroll Down', () => {
+  it('TC25 - Verify Scroll Up using Arrow button and Scroll Down functionality', () => {
     // When: hace click en la flecha de "scroll up"
     cy.get('#scrollUp').should('be.visible').click()
 
@@ -35,7 +35,7 @@ describe('Scroll Up / Scroll Down', () => {
     shouldBeInViewport('#slider-carousel .item.active h2', HERO_TEXT)
   })
 
-  it('TC26 - Scroll Up without Arrow button and Scroll Down', () => {
+  it('TC26 - Verify Scroll Up without Arrow button and Scroll Down functionality', () => {
     // When: sube manualmente hasta arriba
     cy.scrollTo('top')
 
