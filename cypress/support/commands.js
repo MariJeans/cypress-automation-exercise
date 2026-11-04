@@ -67,3 +67,48 @@ Cypress.Commands.add('loginSinAssert', (email, password) => {
 
 
 
+
+// Agrega al carrito el producto en la posición `index` del listado principal y espera el modal de confirmación
+Cypress.Commands.add('addProductToCart', (index = 0) => {
+  cy.get('.features_items .product-image-wrapper')
+    .eq(index)
+    .find('.productinfo .add-to-cart')
+    .click({ force: true }) // force: true porque el botón real está oculto
+  cy.get('.modal-content', { timeout: 10000 })
+    .should('be.visible')
+    .and('contain.text', 'Your product has been added to cart.')
+})
+
+// Verifica que un bloque de dirección (delivery o invoice) contenga los datos del usuario registrado
+Cypress.Commands.add('verifyAddress', (selector, user) => {
+  cy.get(selector).should(($address) => {
+    const texto = $address.text()
+    expect(texto).to.include(`${user.firstName} ${user.lastName}`)
+    expect(texto).to.include(user.address)
+    expect(texto).to.include(user.country)
+    expect(texto).to.include(user.city)
+    expect(texto).to.include(user.zipcode)
+    expect(texto).to.include(user.mobile)
+  })
+})
+
+// Completa el formulario de pago y verifica la página de confirmación de la orden
+Cypress.Commands.add('payAndConfirmOrder', (user) => {
+  cy.contains('Payment').should('be.visible')
+  cy.get('[data-qa="name-on-card"]').type(`${user.firstName} ${user.lastName}`)
+  cy.get('[data-qa="card-number"]').type('1234 5678 9012 3456')
+  cy.get('[data-qa="cvc"]').type('123')
+  cy.get('[data-qa="expiry-month"]').type('12')
+  cy.get('[data-qa="expiry-year"]').type('2028')
+  cy.get('[data-qa="pay-button"]').click()
+  // El mensaje "Your order has been placed successfully!" es transitorio, verificamos la página final
+  cy.url().should('include', '/payment_done')
+  cy.contains('Order Placed!').should('be.visible')
+  cy.contains('Congratulations! Your order has been confirmed!').should('be.visible')
+})
+
+// Elimina la cuenta del usuario logueado (cleanup)
+Cypress.Commands.add('deleteAccount', () => {
+  cy.contains('a', 'Delete Account').click({ force: true })
+  cy.contains('Account Deleted!').should('be.visible')
+})

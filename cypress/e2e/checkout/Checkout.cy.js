@@ -181,4 +181,55 @@ describe('Checkout', () => {
 
   })
 
+  it('TC23 - Verify address details in checkout page', () => {
+    // Given: usuario recién registrado con un producto en el carrito
+    cy.registerUser().then((user) => {
+      cy.visit('/products')
+      cy.addProductToCart(0)
+      cy.get('.modal-content').contains('View Cart').click()
+      cy.url().should('include', '/view_cart')
+
+      // When: va al checkout
+      cy.contains('Proceed To Checkout').click()
+
+      // Then: las direcciones de entrega y facturación coinciden con las del registro
+      cy.verifyAddress('#address_delivery', user)
+      cy.verifyAddress('#address_invoice', user)
+
+      // Cleanup
+      cy.deleteAccount()
+    })
+  })
+
+  it('TC24 - Download Invoice after purchase order', () => {
+    // Given: producto en el carrito sin estar logueado
+    cy.visit('/products')
+    cy.addProductToCart(0)
+    cy.get('.modal-content').contains('View Cart').click()
+    cy.url().should('include', '/view_cart')
+    cy.contains('Proceed To Checkout').click()
+    cy.get('.modal-content a[href="/login"]').should('be.visible')
+
+    // When: se registra durante el checkout y completa la compra
+    cy.registerUser().then((user) => {
+      cy.get('.shop-menu a[href="/view_cart"]').click()
+      cy.contains('Proceed To Checkout').click()
+      cy.verifyAddress('#address_delivery', user)
+      cy.get('#ordermsg').type('Test order comment')
+      cy.contains('Place Order').click()
+      cy.payAndConfirmOrder(user)
+
+      // Then: descarga la factura y su contenido es correcto
+      cy.contains('a', 'Download Invoice').click()
+      cy.readFile(`${Cypress.config('downloadsFolder')}/invoice.txt`, { timeout: 15000 })
+        .should('contain', `${user.firstName} ${user.lastName}`)
+        .and('contain', 'Your total purchase amount is')
+
+      cy.get('[data-qa="continue-button"]').click()
+
+      // Cleanup
+      cy.deleteAccount()
+    })
+  })
+
 })

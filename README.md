@@ -2,7 +2,7 @@
 
 Personal practice project automating end-to-end (E2E) tests for [Automation Exercise](https://automationexercise.com/), a demo e-commerce site built specifically for practicing test automation. The site publishes an [official regression suite](https://automationexercise.com/test_cases) of 26 test cases, which this project tracks and automates incrementally. Built with Cypress and JavaScript, with a planned migration to Playwright as a later phase.
 
-**Progress: 14 / 26 official test cases automated (TC01–TC14) — 15 tests, all passing.**
+**Progress: 26 / 26 official test cases automated (TC01–TC26) — 27 tests, all passing.**
 
 ## What's covered
 
@@ -22,6 +22,18 @@ Personal practice project automating end-to-end (E2E) tests for [Automation Exer
 | **Cart** | TC12 — Add products to cart | Add two products via the confirmation modal, verify rows and product IDs in the cart |
 | | TC13 — Verify product quantity in cart | Update quantity from the product detail page and assert the cart total quantity |
 | **Checkout** | TC14 — Register while checkout | End-to-end purchase: add to cart → register during checkout → verify delivery address and order review → payment → order confirmation page → account deletion |
+| | TC15 — Register before checkout | Register first, then add to cart, verify address, add an order comment, pay and confirm |
+| | TC16 — Login before checkout | Same purchase flow with the permanent test account |
+| | TC23 — Verify address details | Delivery and billing addresses match the data used at registration |
+| | TC24 — Download invoice | Full purchase, then download the invoice and check its content with `cy.readFile` |
+| **Cart (more)** | TC17 — Remove products from cart | Delete a product with the "X" and verify the cart is empty |
+| | TC22 — Add from Recommended items | Add a product from the Recommended items carousel and find it in the cart by product ID |
+| **Products (more)** | TC18 — View category products | Women > Dress and Men > Tshirts category pages |
+| | TC19 — View brand products | Polo and H&M brand pages |
+| | TC20 — Search and verify cart after login | Add all search results to the cart as a guest, log in, and verify the same products are still there |
+| | TC21 — Add review on product | Submit a review and verify the confirmation message |
+| **Scroll** | TC25 — Scroll up with arrow button | Scroll to the footer, then go back up with the arrow button and check the banner is on screen |
+| | TC26 — Scroll up without arrow button | Same as TC25, but scrolling back up manually |
 
 ## Practices applied
 
