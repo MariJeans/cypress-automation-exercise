@@ -47,7 +47,7 @@ Personal practice project automating end-to-end (E2E) tests for [Automation Exer
 
 ## Why this project
 
-This is where I practice and reinforce automation skills with Cypress, using AI as a support tool in the process (e.g. reviewing test structure, explaining new Cypress APIs, and thinking through edge cases) — while writing all the code myself. It's a learning project, not a client deliverable, but it reflects the same attention to clear, stable, secure test code that I aim to apply professionally.
+This is where I practice and reinforce automation skills with Cypress, using AI as a support tool in the process (e.g. reviewing test structure, explaining new Cypress APIs, and thinking through edge cases) — and, for part of the suite, as a co-author. I wrote TC01–TC16 myself. TC17–TC26 (and the shared commands `addProductToCart`, `verifyAddress`, `payAndConfirmOrder` and `deleteAccount`) were written with Claude Code, following the conventions I set in the earlier tests, and then reviewed and run by me. It's a learning project, not a client deliverable, but it reflects the same attention to clear, stable, secure test code that I aim to apply professionally.
 
 ## Tech stack
 
